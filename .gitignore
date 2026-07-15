@@ -1,0 +1,263 @@
+﻿# ==========================================================
+# Dependencies
+# ==========================================================
+
+node_modules/
+.pnp/
+.pnp.js
+.pnp.cjs
+
+
+# ==========================================================
+# Package-manager files and caches
+# ==========================================================
+
+# pnpm cache/store
+.pnpm-store/
+.pnpm-debug.log*
+pnpm-debug.log*
+
+# npm logs/cache
+.npm/
+npm-debug.log*
+npm-error.log*
+
+# Yarn logs/cache
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+yarn-debug.log*
+yarn-error.log*
+
+# Keep the package-manager lockfile committed
+# Do NOT ignore pnpm-lock.yaml
+
+
+# ==========================================================
+# TypeScript / NestJS build output
+# ==========================================================
+
+dist/
+build/
+out/
+lib/
+
+*.tsbuildinfo
+
+# NestJS generated output
+.nest/
+
+
+# ==========================================================
+# Environment variables and secrets
+# ==========================================================
+
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+# Local environment overrides
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Secret and credential files
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+secrets/
+credentials/
+credentials.json
+service-account.json
+firebase-adminsdk*.json
+
+
+# ==========================================================
+# Prisma
+# ==========================================================
+
+# Local SQLite databases, where applicable
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Prisma local development databases
+prisma/dev.db
+prisma/dev.db-journal
+
+# Prisma generated client when using a custom output directory
+generated/prisma/
+src/generated/prisma/
+
+# Temporary Prisma files
+prisma/*.tmp
+prisma/*.bak
+
+# ==========================================================
+# Logs
+# ==========================================================
+
+logs/
+*.log
+
+debug.log
+error.log
+access.log
+
+log/
+log/*.log
+
+# Process manager logs
+pm2.log
+pm2-error.log
+pm2-out.log
+.pids/
+*.pid
+*.pid.lock
+*.seed
+
+
+# ==========================================================
+# Testing and coverage
+# ==========================================================
+
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+
+junit.xml
+coverage-final.json
+
+# Jest cache
+.jest-cache/
+
+# Vitest cache
+.vitest/
+
+
+# ==========================================================
+# Temporary and runtime files
+# ==========================================================
+
+tmp/
+temp/
+.cache/
+.cache-loader/
+.eslintcache
+.stylelintcache
+
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.old
+
+# Application runtime storage
+runtime/
+storage/
+sessions/
+
+# Local uploads should not be committed
+uploads/
+public/uploads/
+
+# Preserve empty upload directories when needed
+!uploads/.gitkeep
+!public/uploads/.gitkeep
+
+
+# ==========================================================
+# API documentation output
+# ==========================================================
+
+docs/generated/
+swagger-output.json
+openapi.generated.json
+openapi.json
+
+
+# ==========================================================
+# Queues, jobs and local infrastructure
+# ==========================================================
+
+bull-data/
+redis-data/
+postgres-data/
+mongodb-data/
+
+data/
+.local-data/
+
+
+# ==========================================================
+# Docker
+# ==========================================================
+
+.docker/
+docker-data/
+
+# Docker Compose override files often contain local settings
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Keep these committed:
+# Dockerfile
+# docker-compose.yml
+# .dockerignore
+
+
+# ==========================================================
+# Deployment platforms
+# ==========================================================
+
+# Vercel
+.vercel/
+
+# Netlify
+.netlify/
+
+# Serverless Framework
+.serverless/
+
+# AWS SAM
+.aws-sam/
+
+# SST
+.sst/
+
+# Firebase
+.firebase/
+
+# Railway local metadata
+.railway/
+
+# Render local/config files containing secrets
+.render/
+
+
+# ==========================================================
+# IDEs and editors
+# ==========================================================
+
+# Visual Studio Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+!.vscode/launch.example.json
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
