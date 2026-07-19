@@ -182,7 +182,9 @@ export class GalleryService {
             ? { coverImageUrl: dto.coverImageUrl }
             : {}),
           ...(dto.featured !== undefined ? { featured: dto.featured } : {}),
-          ...(dto.categoryId !== undefined ? { categoryId: dto.categoryId } : {}),
+          ...(dto.categoryId !== undefined
+            ? { categoryId: dto.categoryId }
+            : {}),
         },
         include: { category: true, _count: { select: { images: true } } },
       });
