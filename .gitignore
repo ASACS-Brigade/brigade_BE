@@ -162,7 +162,7 @@ storage/
 sessions/
 
 # Local uploads should not be committed
-uploads/
+/uploads/
 public/uploads/
 
 # Preserve empty upload directories when needed
