@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -18,6 +19,8 @@ import { CreateGalleryAlbumDto } from './dto/create-gallery-album.dto';
 import { CreateGalleryCategoryDto } from './dto/create-gallery-category.dto';
 import { CreateGalleryImageDto } from './dto/create-gallery-image.dto';
 import { GalleryService } from './gallery.service';
+import { UpdateGalleryAlbumDto } from './dto/update-gallery-album.dto';
+import { UpdateGalleryCategoryDto } from './dto/update-gallery-category.dto';
 
 @ApiTags('Gallery')
 @ApiErrorResponses()
@@ -55,9 +58,40 @@ export class GalleryController {
 
   @ApiBearerAuth()
   @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.EDITOR)
+  @Patch('categories/:id')
+  updateCategory(
+    @Param('id') id: string,
+    @Body() dto: UpdateGalleryCategoryDto,
+  ) {
+    return this.galleryService.updateCategory(id, dto);
+  }
+
+  @ApiBearerAuth()
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+  @Delete('categories/:id')
+  removeCategory(@Param('id') id: string) {
+    return this.galleryService.removeCategory(id);
+  }
+
+  @ApiBearerAuth()
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.EDITOR)
   @Post('albums')
   createAlbum(@Body() dto: CreateGalleryAlbumDto) {
     return this.galleryService.createAlbum(dto);
+  }
+
+  @ApiBearerAuth()
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.EDITOR)
+  @Patch('albums/:id')
+  updateAlbum(@Param('id') id: string, @Body() dto: UpdateGalleryAlbumDto) {
+    return this.galleryService.updateAlbum(id, dto);
+  }
+
+  @ApiBearerAuth()
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+  @Delete('albums/:id')
+  removeAlbum(@Param('id') id: string) {
+    return this.galleryService.removeAlbum(id);
   }
 
   @ApiBearerAuth()

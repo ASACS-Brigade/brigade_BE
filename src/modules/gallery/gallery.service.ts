@@ -10,6 +10,8 @@ import { PrismaService } from '../../database/prisma.service';
 import { CreateGalleryAlbumDto } from './dto/create-gallery-album.dto';
 import { CreateGalleryCategoryDto } from './dto/create-gallery-category.dto';
 import { CreateGalleryImageDto } from './dto/create-gallery-image.dto';
+import { UpdateGalleryAlbumDto } from './dto/update-gallery-album.dto';
+import { UpdateGalleryCategoryDto } from './dto/update-gallery-category.dto';
 
 @Injectable()
 export class GalleryService {
@@ -104,6 +106,48 @@ export class GalleryService {
     }
   }
 
+  async updateCategory(id: string, dto: UpdateGalleryCategoryDto) {
+    try {
+      return await this.prisma.galleryCategory.update({
+        where: { id },
+        data: {
+          ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
+          ...(dto.slug !== undefined ? { slug: dto.slug.trim() } : {}),
+          ...(dto.description !== undefined
+            ? { description: dto.description?.trim() }
+            : {}),
+          ...(dto.coverImageUrl !== undefined
+            ? { coverImageUrl: dto.coverImageUrl }
+            : {}),
+          ...(dto.sortOrder !== undefined ? { sortOrder: dto.sortOrder } : {}),
+        },
+      });
+    } catch (error) {
+      this.handleWriteError(error, 'Gallery category');
+    }
+  }
+
+  async removeCategory(id: string) {
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        const albums = await tx.galleryAlbum.findMany({
+          where: { categoryId: id },
+          select: { id: true },
+        });
+
+        await tx.galleryImage.deleteMany({
+          where: { albumId: { in: albums.map((album) => album.id) } },
+        });
+        await tx.galleryAlbum.deleteMany({ where: { categoryId: id } });
+        await tx.galleryCategory.delete({ where: { id } });
+      });
+
+      return { deleted: true, id };
+    } catch (error) {
+      this.handleWriteError(error, 'Gallery category');
+    }
+  }
+
   async createAlbum(dto: CreateGalleryAlbumDto) {
     try {
       return await this.prisma.galleryAlbum.create({
@@ -118,6 +162,39 @@ export class GalleryService {
         },
         include: { category: true },
       });
+    } catch (error) {
+      this.handleWriteError(error, 'Gallery album');
+    }
+  }
+
+  async updateAlbum(id: string, dto: UpdateGalleryAlbumDto) {
+    try {
+      return await this.prisma.galleryAlbum.update({
+        where: { id },
+        data: {
+          ...(dto.title !== undefined ? { title: dto.title.trim() } : {}),
+          ...(dto.slug !== undefined ? { slug: dto.slug.trim() } : {}),
+          ...(dto.description !== undefined
+            ? { description: dto.description?.trim() }
+            : {}),
+          ...(dto.year !== undefined ? { year: dto.year } : {}),
+          ...(dto.coverImageUrl !== undefined
+            ? { coverImageUrl: dto.coverImageUrl }
+            : {}),
+          ...(dto.featured !== undefined ? { featured: dto.featured } : {}),
+          ...(dto.categoryId !== undefined ? { categoryId: dto.categoryId } : {}),
+        },
+        include: { category: true, _count: { select: { images: true } } },
+      });
+    } catch (error) {
+      this.handleWriteError(error, 'Gallery album');
+    }
+  }
+
+  async removeAlbum(id: string) {
+    try {
+      await this.prisma.galleryAlbum.delete({ where: { id } });
+      return { deleted: true, id };
     } catch (error) {
       this.handleWriteError(error, 'Gallery album');
     }

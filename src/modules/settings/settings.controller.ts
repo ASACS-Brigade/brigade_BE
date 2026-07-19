@@ -16,7 +16,12 @@ export class SettingsController {
   @Public() @Get('public') findPublic() {
     return this.settingsService.findPublic();
   }
-  @ApiBearerAuth() @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN) @Put() upsert(
+
+  @ApiBearerAuth() @Roles(UserRole.SUPER_ADMIN) @Get() findAll() {
+    return this.settingsService.findAll();
+  }
+
+  @ApiBearerAuth() @Roles(UserRole.SUPER_ADMIN) @Put() upsert(
     @Body() dto: UpsertSettingDto,
   ) {
     return this.settingsService.upsert(dto);

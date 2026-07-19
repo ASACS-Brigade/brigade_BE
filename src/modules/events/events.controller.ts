@@ -28,17 +28,23 @@ export class EventsController {
   @Public() @Get() findAll(@Query() query: PaginationQueryDto) {
     return this.eventsService.findAll(query);
   }
+  @ApiBearerAuth()
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER)
+  @Get('admin/all')
+  findAllForAdmin(@Query() query: PaginationQueryDto) {
+    return this.eventsService.findAllForAdmin(query);
+  }
   @Public() @Get(':slug') findOne(@Param('slug') slug: string) {
     return this.eventsService.findOne(slug);
   }
   @ApiBearerAuth()
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
   @Post()
   create(@Body() dto: CreateEventDto) {
     return this.eventsService.create(dto);
   }
   @ApiBearerAuth()
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.EDITOR)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateEventDto) {
     return this.eventsService.update(id, dto);

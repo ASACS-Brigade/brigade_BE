@@ -39,6 +39,13 @@ export class ArticlesController {
     return this.articlesService.findCategories();
   }
 
+  @ApiBearerAuth()
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER)
+  @Get('admin/all')
+  findAllForAdmin(@Query() query: PaginationQueryDto) {
+    return this.articlesService.findAllForAdmin(query);
+  }
+
   @Public()
   @Get(':slug')
   findOne(@Param('slug') slug: string) {
@@ -60,6 +67,16 @@ export class ArticlesController {
     @Body() dto: UpdateArticleCategoryDto,
   ) {
     return this.articlesService.updateCategory(id, dto);
+  }
+
+  @ApiBearerAuth()
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+  @Delete('categories/:id')
+  removeCategory(
+    @Param('id') id: string,
+    @Query('moveToCategoryId') moveToCategoryId?: string,
+  ) {
+    return this.articlesService.removeCategory(id, moveToCategoryId);
   }
 
   @ApiBearerAuth()

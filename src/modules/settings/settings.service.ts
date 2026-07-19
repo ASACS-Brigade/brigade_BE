@@ -22,6 +22,10 @@ export class SettingsService {
     );
   }
 
+  findAll() {
+    return this.prisma.siteSetting.findMany({ orderBy: { key: 'asc' } });
+  }
+
   upsert(dto: UpsertSettingDto) {
     return this.prisma.siteSetting.upsert({
       where: { key: dto.key },

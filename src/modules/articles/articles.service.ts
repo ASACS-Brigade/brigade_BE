@@ -57,6 +57,42 @@ export class ArticlesService {
     };
   }
 
+  async findAllForAdmin(query: PaginationQueryDto) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 100;
+    const skip = (page - 1) * limit;
+    const where: Prisma.ArticleWhereInput = {
+      ...(query.search
+        ? {
+            OR: [
+              { title: { contains: query.search, mode: 'insensitive' } },
+              { excerpt: { contains: query.search, mode: 'insensitive' } },
+              { deck: { contains: query.search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    };
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.article.findMany({
+        where,
+        include: {
+          category: true,
+          author: { select: { id: true, name: true, email: true, role: true } },
+        },
+        orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
+        skip,
+        take: limit,
+      }),
+      this.prisma.article.count({ where }),
+    ]);
+
+    return {
+      items,
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
   async findOne(slug: string) {
     const article = await this.prisma.article.findFirst({
       where: { slug, status: PublishStatus.PUBLISHED },
@@ -88,6 +124,40 @@ export class ArticlesService {
         where: { id },
         data: dto,
       });
+    } catch (error) {
+      this.handleWriteError(error, 'Article category');
+    }
+  }
+
+  async removeCategory(id: string, moveToCategoryId?: string) {
+    try {
+      if (moveToCategoryId) {
+        if (moveToCategoryId === id) {
+          throw new ConflictException(
+            'Choose a different category to move articles into.',
+          );
+        }
+
+        await this.prisma.$transaction([
+          this.prisma.articleCategory.findUniqueOrThrow({
+            where: { id: moveToCategoryId },
+          }),
+          this.prisma.article.updateMany({
+            where: { categoryId: id },
+            data: { categoryId: moveToCategoryId },
+          }),
+          this.prisma.articleCategory.delete({ where: { id } }),
+        ]);
+
+        return { deleted: true, id, movedToCategoryId: moveToCategoryId };
+      }
+
+      await this.prisma.$transaction([
+        this.prisma.article.deleteMany({ where: { categoryId: id } }),
+        this.prisma.articleCategory.delete({ where: { id } }),
+      ]);
+
+      return { deleted: true, id };
     } catch (error) {
       this.handleWriteError(error, 'Article category');
     }

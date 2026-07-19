@@ -4,9 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
-import { hash } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 
 import { PrismaService } from '../../database/prisma.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -61,6 +62,50 @@ export class UsersService {
     } catch (error) {
       this.handlePrismaWriteError(error);
     }
+  }
+
+  async remove(id: string) {
+    try {
+      await this.prisma.$transaction([
+        this.prisma.article.updateMany({
+          where: { authorId: id },
+          data: { authorId: null },
+        }),
+        this.prisma.event.updateMany({
+          where: { authorId: id },
+          data: { authorId: null },
+        }),
+        this.prisma.user.delete({ where: { id } }),
+      ]);
+
+      return { deleted: true, id };
+    } catch (error) {
+      this.handlePrismaWriteError(error);
+    }
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user?.active) {
+      throw new NotFoundException('User not found.');
+    }
+
+    const passwordMatches = await compare(
+      dto.currentPassword,
+      user.passwordHash,
+    );
+
+    if (!passwordMatches) {
+      throw new ConflictException('Current password is incorrect.');
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: await hash(dto.newPassword, 12) },
+    });
+
+    return { changed: true };
   }
 
   async findByEmailWithPassword(email: string) {

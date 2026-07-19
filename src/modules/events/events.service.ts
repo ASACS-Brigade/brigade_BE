@@ -44,6 +44,35 @@ export class EventsService {
     };
   }
 
+  async findAllForAdmin(query: PaginationQueryDto) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 100;
+    const skip = (page - 1) * limit;
+    const where: Prisma.EventWhereInput = {
+      ...(query.search
+        ? {
+            OR: [
+              { title: { contains: query.search, mode: 'insensitive' } },
+              { description: { contains: query.search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    };
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.event.findMany({
+        where,
+        orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
+        skip,
+        take: limit,
+      }),
+      this.prisma.event.count({ where }),
+    ]);
+    return {
+      items,
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
   async findOne(slug: string) {
     const event = await this.prisma.event.findFirst({
       where: { slug, status: PublishStatus.PUBLISHED },

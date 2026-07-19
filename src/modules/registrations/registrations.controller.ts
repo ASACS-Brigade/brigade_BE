@@ -32,7 +32,7 @@ export class RegistrationsController {
   }
 
   @ApiBearerAuth()
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.VIEWER)
   @Get()
   findAll(
     @Query() query: PaginationQueryDto,

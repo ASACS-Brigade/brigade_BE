@@ -32,7 +32,7 @@ export class ContactController {
   }
 
   @ApiBearerAuth()
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.VIEWER)
   @Get('messages')
   findAll(
     @Query() query: PaginationQueryDto,
