@@ -1,4 +1,4 @@
-﻿import {
+import {
   IsArray,
   IsBoolean,
   IsDateString,
@@ -15,9 +15,13 @@ export class CreateEventDto {
   @IsOptional() @IsString() content?: string;
   @IsDateString() startsAt!: string;
   @IsOptional() @IsDateString() endsAt?: string;
+  @IsOptional() @IsDateString() deadlineAt?: string;
   @IsOptional() @IsString() time?: string;
   @IsString() location!: string;
   @IsOptional() @IsString() coverImageUrl?: string;
+  @IsOptional() @IsString() videoUrl?: string;
+  @IsOptional() @IsString() videoPublicId?: string;
+  @IsOptional() @IsString() galleryAlbumId?: string;
   @IsOptional() @IsBoolean() featured?: boolean;
   @IsOptional() @IsEnum(PublishStatus) status?: PublishStatus;
   @IsOptional()
@@ -25,3 +29,4 @@ export class CreateEventDto {
   @IsString({ each: true })
   galleryImageUrls?: string[];
 }
+

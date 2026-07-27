@@ -9,6 +9,9 @@ type ContactNotificationInput = {
   name: string;
   email: string;
   phone?: string | null;
+  title?: string | null;
+  inquiryType?: string | null;
+  preferredContactMethod?: string | null;
   subject: string;
   message: string;
 };
@@ -132,6 +135,9 @@ export class MailService {
         <p><strong>Name:</strong> ${this.escapeHtml(input.name)}</p>
         <p><strong>Email:</strong> ${this.escapeHtml(input.email)}</p>
         <p><strong>Phone:</strong> ${this.escapeHtml(input.phone ?? 'Not provided')}</p>
+        <p><strong>Title:</strong> ${this.escapeHtml(input.title ?? 'Not provided')}</p>
+        <p><strong>Inquiry Type:</strong> ${this.escapeHtml(input.inquiryType ?? 'General')}</p>
+        <p><strong>Preferred Contact:</strong> ${this.escapeHtml(input.preferredContactMethod ?? 'Email')}</p>
         <p><strong>Subject:</strong> ${this.escapeHtml(input.subject)}</p>
         <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
         <p style="white-space: pre-wrap;">${this.escapeHtml(input.message)}</p>
@@ -145,6 +151,9 @@ export class MailService {
       `Name: ${input.name}`,
       `Email: ${input.email}`,
       `Phone: ${input.phone ?? 'Not provided'}`,
+      `Title: ${input.title ?? 'Not provided'}`,
+      `Inquiry Type: ${input.inquiryType ?? 'General'}`,
+      `Preferred Contact: ${input.preferredContactMethod ?? 'Email'}`,
       `Subject: ${input.subject}`,
       '',
       input.message,
@@ -165,3 +174,5 @@ export class MailService {
     return String(error);
   }
 }
+
+

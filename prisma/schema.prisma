@@ -106,6 +106,12 @@ model Event {
   location         String
   coverImageUrl    String?
   galleryImageUrls String[]      @default([])
+  deadlineAt       DateTime?
+  videoUrl         String?
+  videoPublicId    String?
+  galleryAlbumId   String?
+  galleryAlbum     GalleryAlbum? @relation(fields: [galleryAlbumId], references: [id], onDelete: SetNull)
+  galleryImages    GalleryImage[] @relation("EventGalleryImages")
   status           PublishStatus @default(DRAFT)
   featured         Boolean       @default(false)
   authorId         String?
@@ -119,6 +125,8 @@ model GalleryCategory {
   name          String
   slug          String         @unique
   description   String?
+  overviewTitle String?
+  overviewBody  String?
   coverImageUrl String?
   sortOrder     Int            @default(0)
   albums        GalleryAlbum[]
@@ -137,6 +145,7 @@ model GalleryAlbum {
   categoryId    String
   category      GalleryCategory @relation(fields: [categoryId], references: [id])
   images        GalleryImage[]
+  events        Event[]
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 }
@@ -149,8 +158,10 @@ model GalleryImage {
   caption   String?
   width     Int?
   height    Int?
-  albumId   String
-  album     GalleryAlbum @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  albumId       String
+  album         GalleryAlbum @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  sourceEventId String?
+  sourceEvent   Event?       @relation("EventGalleryImages", fields: [sourceEventId], references: [id], onDelete: SetNull)
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 }
@@ -160,6 +171,9 @@ model ContactMessage {
   name      String
   email     String
   phone     String?
+  title     String?
+  inquiryType String?
+  preferredContactMethod String?
   subject   String
   message   String
   status    ContactStatus @default(NEW)
@@ -200,3 +214,6 @@ model SiteSetting {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+
+

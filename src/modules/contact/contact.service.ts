@@ -20,6 +20,9 @@ export class ContactService {
         name: dto.name.trim(),
         email: dto.email.trim().toLowerCase(),
         phone: dto.phone?.trim(),
+        title: dto.title?.trim(),
+        inquiryType: dto.inquiryType?.trim(),
+        preferredContactMethod: dto.preferredContactMethod?.trim(),
         subject: dto.subject.trim(),
         message: dto.message.trim(),
       },
@@ -29,6 +32,9 @@ export class ContactService {
       name: message.name,
       email: message.email,
       phone: message.phone,
+      title: message.title,
+      inquiryType: message.inquiryType,
+      preferredContactMethod: message.preferredContactMethod,
       subject: message.subject,
       message: message.message,
     });
@@ -91,3 +97,5 @@ export class ContactService {
     throw error;
   }
 }
+
+

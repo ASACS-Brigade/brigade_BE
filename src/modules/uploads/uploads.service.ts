@@ -22,9 +22,36 @@ export class UploadsService {
     if (!file.mimetype.startsWith('image/'))
       throw new BadRequestException('Only image uploads are allowed.');
 
-    const folder =
-      this.configService.get<string>('IMAGEKIT_UPLOAD_FOLDER') ?? '/bgb';
-    const result = await this.uploadToImageKit(file, folder);
+    return this.uploadFile(file, 'IMAGEKIT_UPLOAD_FOLDER', '/bgb', ['bgb', 'image']);
+  }
+
+  async uploadVideo(file?: Express.Multer.File) {
+    if (!file) throw new BadRequestException('Video file is required.');
+    if (!file.mimetype.startsWith('video/'))
+      throw new BadRequestException('Only video uploads are allowed.');
+
+    const maxMb = this.configService.get<number>('IMAGEKIT_VIDEO_MAX_MB') ?? 25;
+    const maxBytes = maxMb * 1024 * 1024;
+    if (file.size > maxBytes) {
+      throw new BadRequestException(
+        `Video is too large. Maximum allowed size is ${maxMb}MB.`,
+      );
+    }
+
+    return this.uploadFile(file, 'IMAGEKIT_VIDEO_UPLOAD_FOLDER', '/bgb/videos', [
+      'bgb',
+      'video',
+    ]);
+  }
+
+  private async uploadFile(
+    file: Express.Multer.File,
+    folderKey: string,
+    defaultFolder: string,
+    tags: string[],
+  ) {
+    const folder = this.configService.get<string>(folderKey) ?? defaultFolder;
+    const result = await this.uploadToImageKit(file, folder, tags);
 
     return this.prisma.uploadAsset.create({
       data: {
@@ -42,6 +69,7 @@ export class UploadsService {
   private async uploadToImageKit(
     file: Express.Multer.File,
     folder: string,
+    tags: string[],
   ): Promise<ImageKitUploadResult> {
     const privateKey = this.configService.get<string>('IMAGEKIT_PRIVATE_KEY');
 
@@ -61,7 +89,7 @@ export class UploadsService {
       fileName: this.safeFileName(file.originalname),
       folder,
       useUniqueFileName: true,
-      tags: ['bgb'],
+      tags,
     });
   }
 

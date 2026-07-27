@@ -21,6 +21,7 @@ import { CreateGalleryImageDto } from './dto/create-gallery-image.dto';
 import { GalleryService } from './gallery.service';
 import { UpdateGalleryAlbumDto } from './dto/update-gallery-album.dto';
 import { UpdateGalleryCategoryDto } from './dto/update-gallery-category.dto';
+import { UpdateGalleryImageDto } from './dto/update-gallery-image.dto';
 
 @ApiTags('Gallery')
 @ApiErrorResponses()
@@ -102,9 +103,19 @@ export class GalleryController {
   }
 
   @ApiBearerAuth()
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.EDITOR)
+  @Patch('images/:id')
+  updateImage(@Param('id') id: string, @Body() dto: UpdateGalleryImageDto) {
+    return this.galleryService.updateImage(id, dto);
+  }
+
+  @ApiBearerAuth()
   @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
   @Delete('images/:id')
   removeImage(@Param('id') id: string) {
     return this.galleryService.removeImage(id);
   }
 }
+
+
+

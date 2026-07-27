@@ -35,6 +35,7 @@ export class EventsService {
         orderBy: [{ featured: 'desc' }, { startsAt: 'asc' }],
         skip,
         take: limit,
+        include: { galleryAlbum: { include: { category: true } } },
       }),
       this.prisma.event.count({ where }),
     ]);
@@ -64,6 +65,7 @@ export class EventsService {
         orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
         skip,
         take: limit,
+        include: { galleryAlbum: { include: { category: true } } },
       }),
       this.prisma.event.count({ where }),
     ]);
@@ -76,6 +78,7 @@ export class EventsService {
   async findOne(slug: string) {
     const event = await this.prisma.event.findFirst({
       where: { slug, status: PublishStatus.PUBLISHED },
+      include: { galleryAlbum: { include: { category: true } } },
     });
     if (!event) throw new NotFoundException('Event not found.');
     return event;
@@ -83,9 +86,12 @@ export class EventsService {
 
   async create(dto: CreateEventDto) {
     try {
-      return await this.prisma.event.create({
+      const event = await this.prisma.event.create({
         data: this.mapEventDto(dto) as Prisma.EventUncheckedCreateInput,
+        include: { galleryAlbum: { include: { category: true } } },
       });
+      await this.syncEventGalleryImages(event.id, dto);
+      return event;
     } catch (error) {
       this.handleWriteError(error, 'Event');
     }
@@ -93,10 +99,13 @@ export class EventsService {
 
   async update(id: string, dto: UpdateEventDto) {
     try {
-      return await this.prisma.event.update({
+      const event = await this.prisma.event.update({
         where: { id },
         data: this.mapEventDto(dto),
+        include: { galleryAlbum: { include: { category: true } } },
       });
+      await this.syncEventGalleryImages(event.id, dto);
+      return event;
     } catch (error) {
       this.handleWriteError(error, 'Event');
     }
@@ -125,10 +134,20 @@ export class EventsService {
       ...(dto.endsAt !== undefined
         ? { endsAt: dto.endsAt ? new Date(dto.endsAt) : null }
         : {}),
+      ...(dto.deadlineAt !== undefined
+        ? { deadlineAt: dto.deadlineAt ? new Date(dto.deadlineAt) : null }
+        : {}),
       ...(dto.time !== undefined ? { time: dto.time } : {}),
       ...(dto.location !== undefined ? { location: dto.location.trim() } : {}),
       ...(dto.coverImageUrl !== undefined
         ? { coverImageUrl: dto.coverImageUrl }
+        : {}),
+      ...(dto.videoUrl !== undefined ? { videoUrl: dto.videoUrl } : {}),
+      ...(dto.videoPublicId !== undefined
+        ? { videoPublicId: dto.videoPublicId }
+        : {}),
+      ...(dto.galleryAlbumId !== undefined
+        ? { galleryAlbumId: dto.galleryAlbumId || null }
         : {}),
       ...(dto.featured !== undefined ? { featured: dto.featured } : {}),
       ...(dto.status !== undefined ? { status: dto.status } : {}),
@@ -136,6 +155,34 @@ export class EventsService {
         ? { galleryImageUrls: dto.galleryImageUrls }
         : {}),
     };
+  }
+
+  private async syncEventGalleryImages(
+    eventId: string,
+    dto: CreateEventDto | UpdateEventDto,
+  ) {
+    if (dto.galleryImageUrls === undefined && dto.galleryAlbumId === undefined) {
+      return;
+    }
+
+    const event = await this.prisma.event.findUnique({ where: { id: eventId } });
+    if (!event) throw new NotFoundException('Event not found.');
+
+    await this.prisma.galleryImage.deleteMany({ where: { sourceEventId: eventId } });
+
+    if (!event.galleryAlbumId || event.galleryImageUrls.length === 0) {
+      return;
+    }
+
+    await this.prisma.galleryImage.createMany({
+      data: event.galleryImageUrls.map((url, index) => ({
+        url,
+        albumId: event.galleryAlbumId as string,
+        sourceEventId: event.id,
+        alt: `${event.title} image ${index + 1}`,
+        caption: event.title,
+      })),
+    });
   }
 
   private handleWriteError(error: unknown, label: string): never {

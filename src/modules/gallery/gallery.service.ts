@@ -12,6 +12,7 @@ import { CreateGalleryCategoryDto } from './dto/create-gallery-category.dto';
 import { CreateGalleryImageDto } from './dto/create-gallery-image.dto';
 import { UpdateGalleryAlbumDto } from './dto/update-gallery-album.dto';
 import { UpdateGalleryCategoryDto } from './dto/update-gallery-category.dto';
+import { UpdateGalleryImageDto } from './dto/update-gallery-image.dto';
 
 @Injectable()
 export class GalleryService {
@@ -97,6 +98,8 @@ export class GalleryService {
           name: dto.name.trim(),
           slug: dto.slug.trim(),
           description: dto.description?.trim(),
+          overviewTitle: dto.overviewTitle?.trim(),
+          overviewBody: dto.overviewBody?.trim(),
           coverImageUrl: dto.coverImageUrl,
           sortOrder: dto.sortOrder ?? 0,
         },
@@ -115,6 +118,12 @@ export class GalleryService {
           ...(dto.slug !== undefined ? { slug: dto.slug.trim() } : {}),
           ...(dto.description !== undefined
             ? { description: dto.description?.trim() }
+            : {}),
+          ...(dto.overviewTitle !== undefined
+            ? { overviewTitle: dto.overviewTitle?.trim() }
+            : {}),
+          ...(dto.overviewBody !== undefined
+            ? { overviewBody: dto.overviewBody?.trim() }
             : {}),
           ...(dto.coverImageUrl !== undefined
             ? { coverImageUrl: dto.coverImageUrl }
@@ -220,6 +229,26 @@ export class GalleryService {
     }
   }
 
+
+  async updateImage(id: string, dto: UpdateGalleryImageDto) {
+    try {
+      return await this.prisma.galleryImage.update({
+        where: { id },
+        data: {
+          ...(dto.url !== undefined ? { url: dto.url } : {}),
+          ...(dto.publicId !== undefined ? { publicId: dto.publicId } : {}),
+          ...(dto.alt !== undefined ? { alt: dto.alt?.trim() } : {}),
+          ...(dto.caption !== undefined ? { caption: dto.caption?.trim() } : {}),
+          ...(dto.width !== undefined ? { width: dto.width } : {}),
+          ...(dto.height !== undefined ? { height: dto.height } : {}),
+          ...(dto.albumId !== undefined ? { albumId: dto.albumId } : {}),
+        },
+        include: { album: { include: { category: true } } },
+      });
+    } catch (error) {
+      this.handleWriteError(error, 'Gallery image');
+    }
+  }
   async removeImage(id: string) {
     try {
       await this.prisma.galleryImage.delete({ where: { id } });
@@ -239,3 +268,5 @@ export class GalleryService {
     throw error;
   }
 }
+
+
