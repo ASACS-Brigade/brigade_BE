@@ -12,6 +12,15 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Public()
+  @Get()
+  root() {
+    return {
+      ...this.appService.health(),
+      message: 'Server is up and running.',
+    };
+  }
+
+  @Public()
   @Get('health')
   health() {
     return this.appService.health();
